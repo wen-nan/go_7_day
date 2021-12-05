@@ -2,6 +2,8 @@ package lru
 
 import "container/list"
 
+// LRU缓存淘汰策略
+
 type Cache struct {
 	maxBytes int64
 	nBytes int64

@@ -1,5 +1,7 @@
 package go_cache
 
+// 缓存值的抽象与封装
+
 // ByteView 表示缓存值类型
 type ByteView struct {
 	b []byte

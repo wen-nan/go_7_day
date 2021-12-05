@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+// 负责与外部交互，控制缓存存储和获取的主流程
+
 type Getter interface {
 	Get(key string) ([]byte, error)
 }
