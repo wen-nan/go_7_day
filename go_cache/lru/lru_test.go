@@ -36,6 +36,15 @@ func TestCache_RemoveOldest(t *testing.T) {
 	}
 }
 
+func TestCache_Add(t *testing.T) {
+	lru := New(int64(0), nil)
+	lru.Add("key1", String("value1"))
+	lru.Add("key1", String("value2"))
+	if val, ok := lru.Get("key1"); !ok || string(val.(String)) != "value2"  {
+		t.Fatalf("Add value2 failed")
+	}
+}
+
 func TestOnEvicted(t *testing.T) {
 	keys := make([]string, 0)
 	callback := func(key string, value Value) {
@@ -49,6 +58,6 @@ func TestOnEvicted(t *testing.T) {
 
 	expect := []string{"key1", "k2"}
 	if !reflect.DeepEqual(expect, keys) {
-		t.Fatalf("Call OnEvicted failed, expect keys equals to %s", expect)
+		t.Fatalf("Call OnEvicted failed, expect keys not equals to %s", expect)
 	}
 }
