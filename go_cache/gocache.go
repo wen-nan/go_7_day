@@ -118,7 +118,9 @@ func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 }
 
 func (g *Group) getLocally(key string) (ByteView, error) {
+	// 调用对应group的回调函数
 	bytes, err := g.getter.Get(key)
+
 	if err != nil {
 		return ByteView{}, err
 	}
@@ -127,6 +129,7 @@ func (g *Group) getLocally(key string) (ByteView, error) {
 	return value, nil
 }
 
+// populateCache 将键值添加到缓存中
 func (g *Group) populateCache(key string, value ByteView) {
 	g.mainCache.add(key, value)
 }

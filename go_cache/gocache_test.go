@@ -40,7 +40,7 @@ func TestGroup_Get(t *testing.T) {
 
 	for k, v := range db {
 		if view, err := gee.Get(k); err != nil || view.String() != v {
-			t.Fatalf("failed to get value of Tom")
+			t.Fatalf("failed to get value %v", v)
 		} // load from callback function
 		if _, err := gee.Get(k); err != nil || loadCounts[k] > 1 {
 			t.Fatalf("cache %s miss", k)
