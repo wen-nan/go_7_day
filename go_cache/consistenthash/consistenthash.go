@@ -51,10 +51,12 @@ func (m *Map) Get(key string) string {
 	if len(m.keys) == 0 {
 		return ""
 	}
+	// 计算key对应的哈希值
 	hash := int(m.hash([]byte(key)))
-	// binary search
+	// 二分查找对应虚拟节点
 	idx := sort.Search(len(m.keys), func(i int) bool {
 		return m.keys[i] >= hash
 	})
+	// 如果idx==len(m.keys),说明应该选择m.keys[0]
 	return m.hashMap[m.keys[idx%len(m.keys)]]
 }
