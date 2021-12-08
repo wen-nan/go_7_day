@@ -2,6 +2,7 @@ package go_cache
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"go_cache/consistenthash"
 	pb "go_cache/gocachepb"
 	"io/ioutil"
@@ -10,7 +11,6 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"github.com/golang/protobuf/proto"
 )
 
 // 提供被其他节点访问的能力（基于HTTP）
@@ -128,4 +128,4 @@ func (p *HTTPPool) PickPeer(key string) (PeerGetter, bool) {
 	return nil, false
 }
 
-var _PeerGetter = (*httpGetter)(nil)
+var _ PeerGetter = (*httpGetter)(nil)
