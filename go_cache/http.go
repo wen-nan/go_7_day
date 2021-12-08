@@ -22,10 +22,13 @@ type HTTPPool struct {
 	self string
 	basePath string
 	mu sync.Mutex
+	// 一致性哈希算法的Map,用于根据具体key选择节点
 	peers *consistenthash.Map
+	// 映射远程节点与其对应的httpGetter
 	httpGetters map[string]*httpGetter
 }
 
+// http客户端结构体并实现PeerGetter接口
 type httpGetter struct {
 	baseURL string
 }
@@ -71,9 +74,11 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/octet-stream")
+	// 服务端返回缓存值的[]byte拷贝
 	w.Write(view.ByteSlice())
 }
 
+// Get http客户端方法，访问远程服务端节点从对应group查找key的缓存值
 func (h *httpGetter) Get(group string, key string) ([]byte, error) {
 	u := fmt.Sprintf(
 		"%v%v/%v",
@@ -109,6 +114,7 @@ func (p *HTTPPool) Set(peers ...string) {
 	p.peers.Add(peers...)
 	p.httpGetters = make(map[string]*httpGetter, len(peers))
 	for _, peer := range peers {
+		// 创建一个httpGetter,即一个客户端
 		p.httpGetters[peer] = &httpGetter{baseURL: peer + p.basePath}
 	}
 }

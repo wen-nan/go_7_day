@@ -23,7 +23,6 @@ type Group struct {
 	getter Getter
 	mainCache cache
 	peers PeerPicker
-
 }
 
 var (
@@ -93,6 +92,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 	return g.getLocally(key)
 }
 
+// getFromPeer 访问远程节点peerGetter,获取key缓存值
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 	bytes, err := peer.Get(g.name, key)
 	if err != nil {
