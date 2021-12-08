@@ -2,9 +2,7 @@ package go_cache
 
 import (
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"go_cache/consistenthash"
-	pb "go_cache/gocachepb"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -67,41 +65,39 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	view, err := group.Get(key)
-	body, err := proto.Marshal(&pb.Response{Value: view.ByteSlice()})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(body)
+	w.Write(view.ByteSlice())
 }
 
-func (h *httpGetter) Get(in *pb.Request, out *pb.Response) error {
+func (h *httpGetter) Get(group string, key string) ([]byte, error) {
 	u := fmt.Sprintf(
 		"%v%v/%v",
 		h.baseURL,
-		url.QueryEscape(in.GetGroup()),
-		url.QueryEscape(in.GetKey()),
-		)
-
+		url.QueryEscape(group),
+		url.QueryEscape(key),
+	)
+	// 发送HTTP请求
 	res, err := http.Get(u)
 	if err != nil {
-		return  err
+		return nil, err
 	}
-
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return  fmt.Errorf("server returned: %v", res.Status)
+		return nil, fmt.Errorf("server returned: %v", res.Status)
 	}
 
 	bytes, err := ioutil.ReadAll(res.Body)
-	if err = proto.Unmarshal(bytes, out); err != nil {
-		return  fmt.Errorf("decoding response body: %v", err)
+	if err != nil {
+		return nil, fmt.Errorf("reading response body: %v", err)
 	}
 
-	return nil
+	return bytes, nil
 }
 
 // Set 实例化一致性哈希算法，并添加传入的节点并为每个节点创建一个HTTP客户端httpGetter
@@ -117,11 +113,12 @@ func (p *HTTPPool) Set(peers ...string) {
 	}
 }
 
-// PickPeer 根据key返回节点和节点对应的HTTP客户端
+// PickPeer 根据key返回节点，即节点对应的HTTP客户端
 func (p *HTTPPool) PickPeer(key string) (PeerGetter, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	// 如果peer不为空并且不是自身节点
 	if peer := p.peers.Get(key); peer != "" && peer != p.self {
 		p.Log("Pick peer %s", peer)
 		return p.httpGetters[peer], true
