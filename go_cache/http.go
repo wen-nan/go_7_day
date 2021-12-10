@@ -30,6 +30,7 @@ type HTTPPool struct {
 
 // http客户端结构体并实现PeerGetter接口
 type httpGetter struct {
+	// http://example.com/_gocache/
 	baseURL string
 }
 
